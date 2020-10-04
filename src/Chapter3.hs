@@ -1130,7 +1130,98 @@ properties using typeclasses, but they are different data types in the end.
 Implement data types and typeclasses, describing such a battle between two
 contestants, and write a function that decides the outcome of a fight!
 -}
+newtype Potion = Potion Int
+newtype Spell = Spell Int
 
+class Fighter a where
+  attack :: a -> a -> a
+  isAttacked :: Int -> a -> a
+  runAway :: a -> a
+  health :: a -> Int
+  -- act :: a -> a
+  -- endTurn :: a -> a
+
+-- data KnightAction = KAttack | KRunAway | KDrinkPotion | KCastSpell
+data KnightT9 = KnightT9
+  { knightAttack :: Int
+  , knightHealth :: Int
+  , knightDefense :: Int
+  -- , knightActions :: [KnightAction]
+  }
+
+drinkPotion :: KnightT9 -> Potion -> KnightT9
+drinkPotion k (Potion ph) = k { knightHealth = formerHealth + ph }
+  where
+    formerHealth = knightHealth k
+
+castDefensiveSpell :: KnightT9 -> Spell -> KnightT9
+castDefensiveSpell k (Spell sd) = k { knightDefense = formerDefense + sd }
+  where
+    formerDefense = knightDefense k
+
+instance Fighter KnightT9 where
+  attack :: (Fighter a) => KnightT9 -> a -> a
+  attack k f = isAttacked knAttack f
+    where
+      knAttack = knightAttack k
+
+  isAttacked :: Int -> KnightT9 -> KnightT9
+  isAttacked a1 k = k { knightHealth = finalHealth }
+    where
+      finalHealth = h - max 0 (a1 - d)
+      h = knightHealth k
+      d = knightDefense k
+
+  runAway :: KnightT9 -> KnightT9
+  runAway _ = KnightT9 0 0 0 -- []
+
+  health :: KnightT9 -> Int
+  health = knightHealth
+
+-- data MonsterAction = MAttack | MRunAway
+data MonsterT9 = MonsterT9
+  { monsterAttack :: Int
+  , monsterHealth :: Int
+  -- , monsterActions :: [MonsterAction]
+  }
+
+instance Fighter MonsterT9 where
+  attack :: (Fighter a) => MonsterT9 -> a -> a
+  attack m f = isAttacked mnAttack f
+    where
+      mnAttack = monsterAttack m
+
+  isAttacked :: Int -> MonsterT9 -> MonsterT9
+  isAttacked a m = m { monsterHealth = finalHealth }
+    where
+      finalHealth = (h - a)
+      h = monsterHealth m
+
+  runAway :: MonsterT9 -> MonsterT9
+  runAway _ = MonsterT9 0 0 -- []
+
+  health :: MonsterT9 -> Int
+  health = monsterHealth
+
+  -- endTurn :: MonsterT9 -> MonsterT9
+  -- endTurn m = m {monsterActions = tail actions }
+  --   where
+  --     actions = monsterActions m
+
+knight1 :: KnightT9
+knight1 = KnightT9 10 10 0
+knight2 :: KnightT9
+knight2 = KnightT9 5 12 3
+monster1 :: MonsterT9
+monster1 = MonsterT9 5 5
+monster2 :: MonsterT9
+monster2 = MonsterT9 10 2
+
+fightT9 :: (Fighter a) => a -> a -> a
+fightT9 f1 f2
+  | health f2 <= 0 = f1
+  | health f1 <= 0 = f2
+  | otherwise = undefined
 
 {-
 You did it! Now it is time to the open pull request with your changes
