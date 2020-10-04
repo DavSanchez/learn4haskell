@@ -760,7 +760,7 @@ value of the element itself
 🕯 HINT: Use combination of 'map' and 'replicate'
 -}
 smartReplicate :: [Int] -> [Int]
-smartReplicate l = concat $ map (\e -> replicate e e) l
+smartReplicate = concatMap (\e -> replicate e e)
 
 {- |
 =⚔️= Task 9
