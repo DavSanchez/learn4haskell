@@ -898,8 +898,10 @@ and reverses it.
   cheating!
 -}
 rewind :: [a] -> [a]
-rewind [] = []
-rewind l = last l : rewind (init l)
+rewind = go []
+  where
+    go acc [] = acc
+    go acc (x:xs) = go (x:acc) xs
 
 
 {-
