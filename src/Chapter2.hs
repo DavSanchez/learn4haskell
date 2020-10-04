@@ -878,6 +878,7 @@ list.
 🕯 HINT: Use the 'cycle' function
 -}
 rotate :: Int -> [a] -> [a]
+rotate _ [] = []
 rotate n l
   | n < 0 = []
   | otherwise = take (length l) $ drop n $ cycle l
