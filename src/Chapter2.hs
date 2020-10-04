@@ -361,6 +361,7 @@ ghci> :l src/Chapter2.hs
 subList :: Int -> Int -> [a] -> [a]
 subList i1 i2 ls
   | (i1 < 0) || (i2 < 0) = []
+  | (i2 < i1) = []
   | otherwise = take (i2 - i1 + 1) $ drop i1 ls
 
 {- |
