@@ -634,10 +634,10 @@ specifying complex expressions.
 -}
 
 sumLast2 :: Integral a => a -> a
-sumLast2 n = secondLastDig + lastDig
+sumLast2 n = first + second
   where
-    lastDig = mod an 10
-    secondLastDig = mod (div an 10) 10
+    (first, second) = divMod (twoDigits) 10
+    twoDigits = mod an 100
     an = abs n
 
 
