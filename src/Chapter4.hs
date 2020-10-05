@@ -651,7 +651,7 @@ Can you implement a monad version of AND, polymorphic over any monad?
 -}
 -- Test is failing on "andM (Just False) Nothing = Nothing", expecting "Just False" ?
 andM :: (Monad m) => m Bool -> m Bool -> m Bool 
-andM bool1 bool2 = bool1 >>= \b1 -> (bool2 >>= (\b2 -> pure (b1 && b2)))
+andM bool1 bool2 = bool1 >>= \b1 -> (if b1 then (bool2 >>= (\b2 -> pure b2)) else pure b1)
 
 {- |
 =🐉= Task 9*: Final Dungeon Boss
@@ -710,8 +710,8 @@ reverseTree (Tree n ll rl) = Tree n (reverseTree rl) (reverseTree ll)
 -- Not really sure about this one
 tree2list :: Tree a -> [a]
 tree2list EmptyTree = []
-tree2list (Tree a ll EmptyTree) = a : tree2list ll
-tree2list (Tree a EmptyTree rl) = a : tree2list rl
+tree2list (Tree a ll rl) = a : tree2list ll ++ tree2list rl
+
 {-
 You did it! Now it is time to the open pull request with your changes
 and summon @vrom911 and @chshersh for the review!
