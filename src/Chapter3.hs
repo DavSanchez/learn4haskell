@@ -527,8 +527,12 @@ data MagicalCity = MagicalCity
   , houses :: [House]
   }
 
-buildCastle :: Castle -> MagicalCity -> MagicalCity
-buildCastle cstl city = city { castle = cstl }
+buildCastle :: String -> MagicalCity -> MagicalCity
+buildCastle cname city = city { castle = Castle { name = cname, wall = previousWall }}
+  where
+    previousWall = case castle city of
+      NoCastle -> NoWall
+      Castle _ w -> w 
 
 buildHouse :: House -> MagicalCity -> MagicalCity
 buildHouse h c = c { houses = hh }
@@ -541,7 +545,7 @@ buildWalls c
   | otherwise = c { castle = castleWithWall }
   where
     castleWithWall = Castle { name = castleName, wall = Wall }
-    castleName = name $ castle c
+    castleName = (name . castle) c
 
 countPeople :: [House] -> Int
 countPeople hh = sum $ map housePeople hh
@@ -1138,15 +1142,13 @@ class Fighter a where
   isAttacked :: Int -> a -> a
   runAway :: a -> a
   health :: a -> Int
-  -- act :: a -> a
-  -- endTurn :: a -> a
 
--- data KnightAction = KAttack | KRunAway | KDrinkPotion | KCastSpell
+data KnightAction = KAttack | KRunAway | KDrinkPotion | KCastSpell
 data KnightT9 = KnightT9
   { knightAttack :: Int
   , knightHealth :: Int
   , knightDefense :: Int
-  -- , knightActions :: [KnightAction]
+  , knightActions :: [KnightAction]
   }
 
 drinkPotion :: KnightT9 -> Potion -> KnightT9
@@ -1173,16 +1175,16 @@ instance Fighter KnightT9 where
       d = knightDefense k
 
   runAway :: KnightT9 -> KnightT9
-  runAway _ = KnightT9 0 0 0 -- []
+  runAway _ = KnightT9 0 0 0 []
 
   health :: KnightT9 -> Int
   health = knightHealth
 
--- data MonsterAction = MAttack | MRunAway
+data MonsterAction = MAttack | MRunAway
 data MonsterT9 = MonsterT9
   { monsterAttack :: Int
   , monsterHealth :: Int
-  -- , monsterActions :: [MonsterAction]
+  , monsterActions :: [MonsterAction]
   }
 
 instance Fighter MonsterT9 where
@@ -1198,7 +1200,7 @@ instance Fighter MonsterT9 where
       h = monsterHealth m
 
   runAway :: MonsterT9 -> MonsterT9
-  runAway _ = MonsterT9 0 0 -- []
+  runAway _ = MonsterT9 0 0 []
 
   health :: MonsterT9 -> Int
   health = monsterHealth
@@ -1209,13 +1211,13 @@ instance Fighter MonsterT9 where
   --     actions = monsterActions m
 
 knight1 :: KnightT9
-knight1 = KnightT9 10 10 0
+knight1 = KnightT9 10 10 0 []
 knight2 :: KnightT9
-knight2 = KnightT9 5 12 3
+knight2 = KnightT9 5 12 3 []
 monster1 :: MonsterT9
-monster1 = MonsterT9 5 5
+monster1 = MonsterT9 5 5 []
 monster2 :: MonsterT9
-monster2 = MonsterT9 10 2
+monster2 = MonsterT9 10 2 []
 
 fightT9 :: (Fighter a) => a -> a -> a
 fightT9 f1 f2
