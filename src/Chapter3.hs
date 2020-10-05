@@ -1205,10 +1205,8 @@ instance Fighter MonsterT9 where
   health :: MonsterT9 -> Int
   health = monsterHealth
 
-  -- endTurn :: MonsterT9 -> MonsterT9
-  -- endTurn m = m {monsterActions = tail actions }
-  --   where
-  --     actions = monsterActions m
+performAction :: (Fighter a) => a -> a
+performAction fgtr = undefined
 
 knight1 :: KnightT9
 knight1 = KnightT9 10 10 0 []
@@ -1220,10 +1218,10 @@ monster2 :: MonsterT9
 monster2 = MonsterT9 10 2 []
 
 fightT9 :: (Fighter a) => a -> a -> a
-fightT9 f1 f2
+fightT9 f1 f2 -- first fighter argument is the one who acts upon the second
   | health f2 <= 0 = f1
   | health f1 <= 0 = f2
-  | otherwise = undefined
+  | otherwise = undefined -- recursively call itself every time to perform the entire fight (swap args)
 
 {-
 You did it! Now it is time to the open pull request with your changes
