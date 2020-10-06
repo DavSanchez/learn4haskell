@@ -651,7 +651,7 @@ Can you implement a monad version of AND, polymorphic over any monad?
 -}
 -- Test is failing on "andM (Just False) Nothing = Nothing", expecting "Just False" ?
 andM :: (Monad m) => m Bool -> m Bool -> m Bool 
-andM bool1 bool2 = bool1 >>= \b1 -> (if b1 then (bool2 >>= (\b2 -> pure b2)) else pure b1)
+andM bool1 bool2 = bool1 >>= \b1 -> if b1 then bool2 else pure False
 
 {- |
 =🐉= Task 9*: Final Dungeon Boss
