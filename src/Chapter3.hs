@@ -652,13 +652,13 @@ newtype Damage = Dam Int
 newtype Defense = Def Int
 
 calculatePlayerDamage :: Attack -> Strength -> Damage
-calculatePlayerDamage (Atk attack) (Str strength) = Dam (attack + strength)
+calculatePlayerDamage (Atk atk) (Str strength) = Dam (atk + strength)
 
 calculatePlayerDefense :: Armor -> Dexterity -> Defense
 calculatePlayerDefense (Arm armor) (Dex dexterity) = Def (armor * dexterity)
 
 calculatePlayerHit :: Damage -> Defense -> Health -> Health
-calculatePlayerHit (Dam damage) (Def defense) (Hlh health) = Hlh (health + defense - damage)
+calculatePlayerHit (Dam damage) (Def defense) (Hlh hlth) = Hlh (hlth + defense - damage)
 
 -- The second player hits first player and the new first player is returned
 hitPlayer :: Player -> Player -> Player
