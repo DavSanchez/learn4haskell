@@ -510,8 +510,8 @@ After defining the city, implement the following functions:
 data Castle
   = NoCastle
   | Castle
-    { name :: String  -- Use of partial record field selector: ‘name’ ??
-    , wall :: Wall    -- Use of partial record field selector: ‘wall’ ??
+    { name :: String  -- Warning: Use of partial record field selector
+    , wall :: Wall
     } deriving Eq
 data Wall = NoWall | Wall deriving Eq
 data Person = Person
@@ -1183,7 +1183,7 @@ instance Fighter KnightT9 where
       d = knightDefense k
 
   runAway :: KnightT9 -> KnightT9
-  runAway _ = KnightT9 "A knight who ran away" 0 0 0 []
+  runAway _ = KnightT9 "A cowardly knight" 0 0 0 []
 
   health :: KnightT9 -> Int
   health = knightHealth
@@ -1223,7 +1223,7 @@ instance Fighter MonsterT9 where
       h = monsterHealth m
 
   runAway :: MonsterT9 -> MonsterT9
-  runAway _ = MonsterT9 "A monster who ran away" 0 0 []
+  runAway _ = MonsterT9 "A cowardly monster" 0 0 []
 
   health :: MonsterT9 -> Int
   health = monsterHealth
