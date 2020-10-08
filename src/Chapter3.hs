@@ -1138,33 +1138,40 @@ newtype Potion = Potion Int
 newtype Spell = Spell Int
 
 class Fighter a where
-  attack :: a -> a -> a
+  fighterName :: a -> String
+  attack :: (Fighter b) => a -> b -> (a,b)
   isAttacked :: Int -> a -> a
   runAway :: a -> a
   health :: a -> Int
-  performAction :: a -> a
+  performAction :: (Fighter b) => a -> b -> (a, b)
 
 data KnightAction = KAttack | KRunAway | KDrinkPotion Potion | KCastSpell Spell
 data KnightT9 = KnightT9
-  { knightAttack :: Int
+  { knightName :: String
+  , knightAttack :: Int
   , knightHealth :: Int
   , knightDefense :: Int
   , knightActions :: [KnightAction]
   }
 
 drinkPotion :: Potion -> KnightT9 -> KnightT9
-drinkPotion (Potion ph) k = k { knightHealth = formerHealth + ph }
+drinkPotion (Potion ph) k = healedKnight
   where
+    healedKnight = k {knightHealth = formerHealth + ph}
     formerHealth = knightHealth k
 
 castDefensiveSpell :: Spell -> KnightT9 -> KnightT9
-castDefensiveSpell (Spell sd) k = k { knightDefense = formerDefense + sd }
+castDefensiveSpell (Spell sd) k = fortifiedKnight
   where
+    fortifiedKnight = k {knightDefense = formerDefense + sd}
     formerDefense = knightDefense k
 
 instance Fighter KnightT9 where
-  attack :: (Fighter a) => KnightT9 -> a -> a
-  attack k f = isAttacked knAttack f
+  fighterName :: KnightT9 -> String
+  fighterName k = knightName k
+
+  attack :: (Fighter a) => KnightT9 -> a -> (KnightT9, a)
+  attack k f = (k, isAttacked knAttack f)
     where
       knAttack = knightAttack k
 
@@ -1176,17 +1183,17 @@ instance Fighter KnightT9 where
       d = knightDefense k
 
   runAway :: KnightT9 -> KnightT9
-  runAway _ = KnightT9 0 0 0 []
+  runAway _ = KnightT9 "A knight who ran away" 0 0 0 []
 
   health :: KnightT9 -> Int
   health = knightHealth
 
-  performAction :: KnightT9 -> KnightT9 
-  performAction k@(KnightT9 _ _ _ acts) = case action of
-    KAttack -> kNext -- ?? (WIP)
-    KRunAway -> runAway kNext
-    KDrinkPotion p -> drinkPotion p kNext
-    KCastSpell s -> castDefensiveSpell s kNext
+  performAction :: (Fighter a) => KnightT9 -> a -> (KnightT9, a)
+  performAction k@(KnightT9 _ _ _ _ acts) f = case action of
+    KAttack -> attack kNext f
+    KRunAway -> (runAway kNext, f)
+    KDrinkPotion p -> (drinkPotion p kNext, f)
+    KCastSpell s -> (castDefensiveSpell s kNext, f)
     where
       action = head acts
       next = tail acts ++ [action]
@@ -1194,14 +1201,18 @@ instance Fighter KnightT9 where
 
 data MonsterAction = MAttack | MRunAway
 data MonsterT9 = MonsterT9
-  { monsterAttack :: Int
+  { monsterName :: String
+  , monsterAttack :: Int
   , monsterHealth :: Int
   , monsterActions :: [MonsterAction]
   }
 
 instance Fighter MonsterT9 where
-  attack :: (Fighter a) => MonsterT9 -> a -> a
-  attack m f = isAttacked mnAttack f
+  fighterName :: MonsterT9 -> String
+  fighterName m = monsterName m
+
+  attack :: (Fighter a) => MonsterT9 -> a -> (MonsterT9, a)
+  attack m f = (m, isAttacked mnAttack f)
     where
       mnAttack = monsterAttack m
 
@@ -1212,35 +1223,37 @@ instance Fighter MonsterT9 where
       h = monsterHealth m
 
   runAway :: MonsterT9 -> MonsterT9
-  runAway _ = MonsterT9 0 0 []
+  runAway _ = MonsterT9 "A monster who ran away" 0 0 []
 
   health :: MonsterT9 -> Int
   health = monsterHealth
 
-  performAction :: MonsterT9 -> MonsterT9
-  performAction m@(MonsterT9 _ _ acts) = case action of
-    MRunAway -> runAway m
-    MAttack -> mNext -- ?? (WIP)
+  performAction :: (Fighter a) => MonsterT9 -> a -> (MonsterT9, a)
+  performAction m@(MonsterT9 _ _ _ acts) f = case action of
+    MRunAway -> (runAway m, f)
+    MAttack -> attack mNext f
     where
       action = head acts
       next = tail acts ++ [action]
       mNext = m {monsterActions = next}
 
-
+-- Example contenders
 knight1 :: KnightT9
-knight1 = KnightT9 10 10 0 [KAttack, KAttack, KRunAway]
+knight1 = KnightT9 "Sir Arthur" 10 10 0 [KAttack, KAttack, KRunAway]
 knight2 :: KnightT9
-knight2 = KnightT9 5 12 3 [KCastSpell (Spell 2), KAttack, KDrinkPotion (Potion 2), KAttack, KAttack]
+knight2 = KnightT9 "Lancelot" 5 12 3 [KCastSpell (Spell 2), KAttack, KDrinkPotion (Potion 2), KAttack, KAttack]
 monster1 :: MonsterT9
-monster1 = MonsterT9 5 5 [MAttack, MAttack, MAttack, MRunAway]
+monster1 = MonsterT9 "Unnamed Goblin" 5 5 [MAttack, MAttack, MAttack, MRunAway]
 monster2 :: MonsterT9
-monster2 = MonsterT9 10 2 [MAttack]
+monster2 = MonsterT9 "Unnamed Hobgoblin" 10 10 [MAttack]
 
-fightT9 :: (Fighter a) => a -> a -> a
-fightT9 f1 f2 -- first fighter argument is the one who acts upon the second
-  | health f2 <= 0 = f1
-  | health f1 <= 0 = f2
-  | otherwise = undefined -- recursively call itself every turn to perform the entire fight (swap args)
+fightT9 :: (Fighter a, Fighter b) => (a, b) -> String
+fightT9 (f1, f2) -- first fighter argument is the one who acts upon the second
+  | health f2 <= 0 = "The winner is: " ++ fighterName f1
+  | health f1 <= 0 = "The winner is: " ++ fighterName f2
+  | otherwise = fightT9 (f2', f1') -- recursively call itself every turn to perform the entire fight (swap args)
+  where
+    (f1', f2') = performAction f1 f2
 
 {-
 You did it! Now it is time to the open pull request with your changes
